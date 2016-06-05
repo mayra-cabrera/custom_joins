@@ -5,7 +5,12 @@ class Person < ActiveRecord::Base
   has_many :employees, class_name: "Person", foreign_key: :manager_id
 
   def self.without_remote_manager
-    all
+    joins(<<-SQL).
+      LEFT JOIN people managers
+      ON managers.id = people.manager_id
+    SQL
+    where("managers.location_id = ? OR managers.id IS NULL",
+         Location.first)
   end
 
   def self.order_by_location_name
@@ -17,6 +22,6 @@ class Person < ActiveRecord::Base
   end
 
   def self.with_local_coworkers
-    joins(location: :people).where("people_locations.id <> people.id").distinct
+    includes(location: :people).references(:location).where("people_locations.id <> people.id").distinct
   end
 end
