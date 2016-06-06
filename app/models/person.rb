@@ -9,8 +9,7 @@ class Person < ActiveRecord::Base
       LEFT JOIN people managers
       ON managers.id = people.manager_id
     SQL
-    where("managers.location_id = ? OR managers.id IS NULL",
-         Location.first)
+    where("people.manager_id IS NULL or people.location_id = managers.location_id")
   end
 
   def self.order_by_location_name
